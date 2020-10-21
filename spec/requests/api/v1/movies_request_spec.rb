@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'movies', type: :request do
+RSpec.describe 'Api::V1::Movies', type: :request do
   it "gets the movies" do
     get '/api/v1/movies', params: { page: 1 }
 

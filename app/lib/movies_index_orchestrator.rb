@@ -19,8 +19,6 @@ class MoviesIndexOrchestrator
     @errors = []
     @results = {}
     sanitize_limit_offset(page, per_page)
-    # TODO - move
-    @connection = SQLite3::Database.new('./db/movies.db')
   end
 
   def sanitize_limit_offset(page, per_page)
@@ -34,31 +32,14 @@ class MoviesIndexOrchestrator
 
   def execute
     return false if errors.present?
-    get_movies
-  end
 
-  def get_movies_sql
-    <<~SQL
-      select imdbId, title, genres, releaseDate, budget
-      from movies
-      limit #{limit}
-      offset #{offset}
-    SQL
-  end
+    fetcher = MovieFetcher.new(limit: limit, offset: offset)
 
-  def get_movies
-    @results[:movies] =  @connection.execute(get_movies_sql).map do |row|
-      {
-        imdbId: row[0],
-        title: row[1],
-        genres: row[2],
-        releaseDate: row[3],
-        budget: row[4]
-      }
+    if fetcher.get_movies
+      @results = { movies: fetcher.results }
+    else
+      @errors.concat(fetcher.errors)
+      false
     end
-  rescue StandardError => e
-    backtrace = e.backtrace.join("\n")
-    Rails.logger.error { "#{e.error}\n#{backtrace}" }
-    @errors << "Retrieval error"
   end
 end
