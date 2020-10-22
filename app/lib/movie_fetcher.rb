@@ -23,8 +23,7 @@ class MovieFetcher
   end
 
   def default_connector
-    # TODO - initialize and store so we don't keep creating it
-    SQLite3::Database.new('./db/movies.db')
+    SqliteMoviesConnector.get_connector
   end
 
   def get_movies_sql

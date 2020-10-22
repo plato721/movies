@@ -1,12 +1,12 @@
 require 'rails_helper'
 
-RSpec.describe "Api::V1::MovieYears", type: :request do
+RSpec.describe "Api::V1::MoviesYears", type: :request do
   def year_from_release_date(date)
     DateTime.parse(date).year
   end
 
   it "gets the movies from 1996" do
-    get '/api/v1/movie_years', params: { page: 1, year: 1996 }
+    get '/api/v1/movies_years', params: { page: 1, year: 1996 }
 
     expect(response).to have_http_status(:ok)
 
@@ -24,7 +24,7 @@ RSpec.describe "Api::V1::MovieYears", type: :request do
   end
 
   it "fails on a bad year" do
-    get '/api/v1/movie_years', params: { page: "8", year: "not really a year" }
+    get '/api/v1/movies_years', params: { page: "8", year: "not really a year" }
 
     expect(response).to have_http_status(400)
   end
