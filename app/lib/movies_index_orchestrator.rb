@@ -1,33 +1,25 @@
-# sqlite> .schema movies
-# CREATE TABLE movies (
-#   movieId INTEGER PRIMARY KEY,
-#   imdbId TEXT NOT NULL,
-#   title TEXT NOT NULL,
-#   overview TEXT,
-#   productionCompanies TEXT,
-#   releaseDate TEXT,
-#   budget INTEGER,
-#   revenue INTEGER,
-#   runtime REAL,
-#   language TEXT,
-#   genres TEXT,
-#   status TEXT);
 class MoviesIndexOrchestrator
-  attr_reader :errors, :results, :limit, :offset
+  include ActiveModel::Validations
+
+  attr_reader :results
+  attr_accessor :page, :per_page
+
+  validates :page, numericality: { only_integer: true }
+  validates :per_page, numericality: { only_integer: true }
 
   def initialize(page:, per_page: 50)
-    @errors = []
+    @page = page || "1"
+    @per_page = per_page
     @results = {}
-    sanitize_limit_offset(page, per_page)
+    validate
   end
 
-  def sanitize_limit_offset(page, per_page)
-    page ||= "1"
-    if !(page =~ /^\d+$/)
-      @errors << "Bad page number '#{page}' provided"
-    end
-    @offset = (page.to_i * per_page) - 1
-    @limit = per_page
+  def offset
+    (page.to_i * per_page) - 1
+  end
+
+  def limit
+    per_page
   end
 
   def execute
@@ -38,7 +30,7 @@ class MoviesIndexOrchestrator
     if fetcher.get_movies
       @results = { movies: fetcher.results }
     else
-      @errors.concat(fetcher.errors)
+      errors.add(:fetcher, fetcher.errors.join(", "))
       false
     end
   end

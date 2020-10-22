@@ -1,37 +1,36 @@
 class MoviesYearsIndexOrchestrator
-  attr_reader :errors, :results, :limit, :offset
+  include ActiveModel::Validations
+
+  attr_reader :results
+  attr_accessor :page, :per_page, :year
+
+  validates :page, numericality: { only_integer: true }
+  validates :per_page, numericality: { only_integer: true }
+  validates :year, numericality: { only_integer: true }
 
   def initialize(page:, per_page: 50, year: nil)
-    @errors = []
+    @page = page || "1"
+    @per_page = per_page
     @results = {}
-    sanitize_limit_offset(page, per_page)
-    @year = sanitize_year(year)
+    @year = year
+    validate
   end
 
-  def sanitize_limit_offset(page, per_page)
-    page ||= "1"
-    if !(page =~ /^\d+$/)
-      @errors << "Bad page number '#{page}' provided"
-    end
-    @offset = (page.to_i - 1) * per_page
-    @limit = per_page # not coming from user right now
+  def offset
+    (page.to_i * per_page) - 1
   end
 
-  def sanitize_year(year)
-    @errors << "Year is required" unless year.present?
-    if !(year =~ /^\d+$/)
-      @errors << "Bad year '#{year}' provided"
-    else
-      year.to_i
-    end
+  def limit
+    per_page
   end
 
   def execute
     return false if errors.present?
+
     fetcher = MovieFetcher.new(limit: limit, offset: offset)
-    movies = fetcher.get_movies_year(@year)
+    movies = fetcher.get_movies_year(year.to_i)
     if !movies
-      @errors.concat(fetcher.errors)
+      errors.add(:fetcher, fetcher.errors.join(", "))
       return false
     else
       @results = { movies: movies }
