@@ -1,18 +1,19 @@
 class MoviesYearsIndexOrchestrator
   include ActiveModel::Validations
 
-  attr_reader :results
+  attr_reader :results, :fetcher_class
   attr_accessor :page, :per_page, :year
 
   validates :page, numericality: { only_integer: true }
   validates :per_page, numericality: { only_integer: true }
   validates :year, numericality: { only_integer: true }
 
-  def initialize(page:, per_page: 50, year: nil)
+  def initialize(page:, per_page: 50, year: nil, fetcher_class: nil)
     @page = page || "1"
     @per_page = per_page
     @results = {}
     @year = year
+    @fetcher_class = fetcher_class || SqliteMoviesYearsFetcher
     validate
   end
 
@@ -27,8 +28,8 @@ class MoviesYearsIndexOrchestrator
   def execute
     return false if errors.present?
 
-    fetcher = MovieFetcher.new(limit: limit, offset: offset)
-    movies = fetcher.get_movies_year(year.to_i)
+    fetcher = fetcher_class.new(limit: limit, offset: offset, year: year.to_i)
+    movies = fetcher.execute
     if !movies
       errors.add(:fetcher, fetcher.errors.join(", "))
       return false
