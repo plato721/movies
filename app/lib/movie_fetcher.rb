@@ -1,17 +1,3 @@
-# sqlite> .schema movies
-# CREATE TABLE movies (
-#   movieId INTEGER PRIMARY KEY,
-#   imdbId TEXT NOT NULL,
-#   title TEXT NOT NULL,
-#   overview TEXT,
-#   productionCompanies TEXT,
-#   releaseDate TEXT,
-#   budget INTEGER,
-#   revenue INTEGER,
-#   runtime REAL,
-#   language TEXT,
-#   genres TEXT,
-#   status TEXT);
 class MovieFetcher
   attr_reader :results, :limit, :offset, :errors, :sql_runner, :movies_db
 
@@ -70,15 +56,11 @@ class MovieFetcher
     @results = results_to_hash( raw_results )
   end
 
+  def movie_keys
+    %i(imdbId title genres releaseDate budget)
+  end
+
   def results_to_hash(results)
-    results.map do |row|
-      {
-        imdbId: row[0],
-        title: row[1],
-        genres: row[2],
-        releaseDate: row[3],
-        budget: row[4]
-      }
-    end
+    results.map { |row| movie_keys.zip(row).to_h }
   end
 end
