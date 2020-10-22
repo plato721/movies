@@ -1,4 +1,4 @@
-class SqliteMoviesYearsFetcher
+class SqliteMoviesByYearFetcher
   attr_reader :results, :limit, :offset, :errors, :sql_runner, :movies_db,
               :year
 
