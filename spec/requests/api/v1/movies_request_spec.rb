@@ -13,6 +13,7 @@ RSpec.describe 'Api::V1::Movies', type: :request do
       movie = movies[0]
       expected_keys = ["imdbId", "title", "genres", "releaseDate", "budget"]
       expect(movie.keys).to match_array(expected_keys)
+      expect(movie["budget"]).to match(/^\$(\d{1,3},)*(\d{1,3})*$/)
     end
 
     it "fails on a bad page" do
@@ -24,6 +25,7 @@ RSpec.describe 'Api::V1::Movies', type: :request do
 
   describe "show" do
     it "gets a movie" do
+      # TODO - this will fail if this id/movie change
       get '/api/v1/movies/1089'
 
       expect(response).to have_http_status(:ok)
@@ -42,6 +44,7 @@ RSpec.describe 'Api::V1::Movies', type: :request do
         productionCompanies
       )
       expect(movie.keys).to match_array(expected_keys)
+      expect(movie["budget"]).to eq("$240,000")
     end
   end
 end
