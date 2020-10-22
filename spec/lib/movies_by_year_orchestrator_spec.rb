@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe MoviesYearsIndexOrchestrator do
+describe MoviesByYearIndexOrchestrator do
   context "validations" do
     it "changes a nil page to page 1" do
       orchestrator = described_class.new(page: nil, year: 1950)

@@ -1,6 +1,6 @@
-class Api::V1::MoviesYearsController < ApplicationController
+class Api::V1::MoviesByYearController < ApplicationController
   def index
-    orchestrator = MoviesYearsIndexOrchestrator
+    orchestrator = MoviesByYearIndexOrchestrator
                      .new(page: params[:page], year: params[:year])
     if orchestrator.execute
       render json: orchestrator.results, status: :ok
