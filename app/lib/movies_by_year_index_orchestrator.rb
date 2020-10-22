@@ -1,4 +1,4 @@
-class MoviesYearsIndexOrchestrator
+class MoviesByYearIndexOrchestrator
   include ActiveModel::Validations
 
   attr_reader :results, :fetcher_class
@@ -13,7 +13,7 @@ class MoviesYearsIndexOrchestrator
     @per_page = per_page
     @results = {}
     @year = year
-    @fetcher_class = fetcher_class || SqliteMoviesYearsFetcher
+    @fetcher_class = fetcher_class || SqliteMoviesByYearFetcher
     validate
   end
 
