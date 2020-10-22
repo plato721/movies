@@ -1,7 +1,7 @@
-class MovieFetcher
+class SqliteMoviesFetcher
   attr_reader :results, :limit, :offset, :errors, :sql_runner, :movies_db
 
-  def initialize(movies_db: nil, limit:, offset:, sql_runner: nil)
+  def initialize(limit:, offset:, sql_runner: nil, movies_db: nil)
     @movies_db = movies_db || default_movies_db
     @errors = []
     @limit = limit
@@ -13,39 +13,16 @@ class MovieFetcher
     SqliteMoviesConnector.get_connector
   end
 
-  def get_movies_sql
+  def sql
     <<~SQL
       select imdbId, title, genres, releaseDate, budget
       from movies
-    SQL
-  end
-
-  def get_movies_year_sql(year)
-    get_movies_sql +
-    "where releaseDate like '#{year}%'"
-  end
-
-  def limit_offset_sql
-    <<~SQL
       limit #{limit}
       offset #{offset}
     SQL
   end
 
-  def get_movies_year(year)
-    sql = get_movies_year_sql(year) + limit_offset_sql
-    raw_results = sql_runner.execute(
-      connector: movies_db,
-      sql: sql,
-      error_receiver: self
-    )
-    return if errors.present?
-
-    @results = results_to_hash( raw_results )
-  end
-
-  def get_movies
-    sql = get_movies_sql + limit_offset_sql
+  def execute
     raw_results = sql_runner.execute(
       connector: movies_db,
       sql: sql,
