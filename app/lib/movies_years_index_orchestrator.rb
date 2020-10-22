@@ -1,4 +1,4 @@
-class MoviesYearOrchestrator
+class MoviesYearsIndexOrchestrator
   attr_reader :errors, :results, :limit, :offset
 
   def initialize(page:, per_page: 50, year: nil)
