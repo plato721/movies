@@ -1,12 +1,13 @@
 class SqliteMovieFetcher
-  attr_reader :movies_connector, :ratings_connector, :id, :result
+  attr_reader :movies_db, :ratings_db, :id, :result, :sql_runner
   attr_accessor :errors
 
-  def initialize(id:, movies_connector: nil, ratings_connector: nil)
-    @movies_connector = movies_connector || SqliteMoviesConnector.get_connector
-    @ratings_connector = ratings_connector || SqliteRatingsConnector.get_connector
+  def initialize(id:, movies_db: nil, ratings_db: nil, sql_runner: nil)
+    @movies_db = movies_db || SqliteMoviesConnector.get_connector
+    @ratings_db = ratings_db || SqliteRatingsConnector.get_connector
     @id = id
     @errors = []
+    @sql_runner = sql_runner || SqliteRunner
   end
 
   def get_movie_sql
@@ -26,16 +27,19 @@ class SqliteMovieFetcher
   end
 
   def get_movie_record
-     movies_connector.execute(get_movie_sql)
-  rescue StandardError => e
-    backtrace = e.backtrace.join("\n")
-    Rails.logger.error { "#{e.message}\n#{backtrace}" }
-    errors << "Retrieval error"
-    false
+    sql_runner.execute(
+      connector: movies_db,
+      sql: get_movie_sql,
+      error_receiver: self
+    )
   end
 
   def get_rating
-    ratings_connector.execute(get_rating_sql)
+    sql_runner.execute(
+      connector: ratings_db,
+      sql: get_rating_sql,
+      error_receiver: self
+    )
   end
 
   def mapped_movie_keys

@@ -13,16 +13,17 @@
 #   genres TEXT,
 #   status TEXT);
 class MovieFetcher
-  attr_reader :results, :limit, :offset, :errors
+  attr_reader :results, :limit, :offset, :errors, :sql_runner, :movies_db
 
-  def initialize(connection: nil, limit:, offset:)
-    @connection ||= default_connector
+  def initialize(movies_db: nil, limit:, offset:, sql_runner: nil)
+    @movies_db = movies_db || default_movies_db
     @errors = []
     @limit = limit
     @offset = offset
+    @sql_runner = sql_runner || SqliteRunner
   end
 
-  def default_connector
+  def default_movies_db
     SqliteMoviesConnector.get_connector
   end
 
@@ -47,20 +48,26 @@ class MovieFetcher
 
   def get_movies_year(year)
     sql = get_movies_year_sql(year) + limit_offset_sql
-    @results = results_to_hash( @connection.execute(sql) )
-  rescue StandardError => e
-    backtrace = e.backtrace.join("\n")
-    Rails.logger.error { "#{e.message}\n#{backtrace}" }
-    @errors << "Retrieval error"
+    raw_results = sql_runner.execute(
+      connector: movies_db,
+      sql: sql,
+      error_receiver: self
+    )
+    return if errors.present?
+
+    @results = results_to_hash( raw_results )
   end
 
   def get_movies
     sql = get_movies_sql + limit_offset_sql
-    @results = results_to_hash( @connection.execute(sql) )
-  rescue StandardError => e
-    backtrace = e.backtrace.join("\n")
-    Rails.logger.error { "#{e.message}\n#{backtrace}" }
-    @errors << "Retrieval error"
+    raw_results = sql_runner.execute(
+      connector: movies_db,
+      sql: sql,
+      error_receiver: self
+    )
+    return if errors.present?
+
+    @results = results_to_hash( raw_results )
   end
 
   def results_to_hash(results)
