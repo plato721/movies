@@ -1,5 +1,6 @@
 class SqliteMoviesFetcher
-  attr_reader :results, :limit, :offset, :errors, :sql_runner, :movies_db
+  attr_reader :results, :limit, :offset, :errors, :sql_runner, :movies_db,
+              :transformer
 
   def initialize(limit:, offset:, sql_runner: nil, movies_db: nil)
     @movies_db = movies_db || default_movies_db
@@ -7,6 +8,7 @@ class SqliteMoviesFetcher
     @limit = limit
     @offset = offset
     @sql_runner = sql_runner || SqliteRunner
+    @transformer = transformer || MovieArrayTransformer
   end
 
   def default_movies_db
@@ -30,14 +32,6 @@ class SqliteMoviesFetcher
     )
     return if errors.present?
 
-    @results = results_to_hash( raw_results )
-  end
-
-  def movie_keys
-    %i(imdbId title genres releaseDate budget)
-  end
-
-  def results_to_hash(results)
-    results.map { |row| movie_keys.zip(row).to_h }
+    @results = transformer.execute(raw_results)
   end
 end

@@ -60,15 +60,23 @@ class SqliteMovieFetcher
      movie_record = get_movie_record
      return if errors.present?
 
-     movie = mapped_movie_keys.zip(movie_record).to_h
+     movie = mapped_movie_keys.zip(movie_record.pop).to_h
      raw_rating = get_rating
      return if errors.present?
 
      rating = transform_rating(raw_rating)
      return if errors.present?
 
-     rating = { averageRating: rating }
-     @result = movie.merge(rating)
+     budget = transform_budget(movie[:budget])
+     @result = movie.merge(
+       { averageRating: rating,
+         budget: budget }
+      )
+  end
+
+  def transform_budget(cents)
+    budget = (cents / 100) rescue 0
+    "$#{budget.to_s(:delimited)}"
   end
 
   def transform_rating(rating)
