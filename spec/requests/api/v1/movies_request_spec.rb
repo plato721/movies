@@ -46,5 +46,11 @@ RSpec.describe 'Api::V1::Movies', type: :request do
       expect(movie.keys).to match_array(expected_keys)
       expect(movie["budget"]).to eq("$240,000")
     end
+
+    it "404s on movie not found" do
+      get '/api/v1/movies/1'
+
+      expect(response).to have_http_status(404)
+    end
   end
 end

@@ -1,16 +1,12 @@
 class MoviesShowOrchestrator
-  include ActiveModel::Validations
-
-  attr_accessor :id
+  attr_accessor :id, :errors
   attr_reader :result, :fetch_class
-
-  validates :id, numericality: { only_integer: true }
 
   def initialize(id:, fetch_class: nil)
     @id = id
     @result = {}
+    @errors = []
     @fetch_class = fetch_class || SqliteMovieFetcher
-    validate
   end
 
   def execute
@@ -21,7 +17,7 @@ class MoviesShowOrchestrator
     if fetcher.execute
       @result = { movie: fetcher.result }
     else
-      errors.add(:fetcher, fetcher.errors.join(", "))
+      self.errors = fetcher.errors
       false
     end
   end

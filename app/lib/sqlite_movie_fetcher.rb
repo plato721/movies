@@ -58,6 +58,11 @@ class SqliteMovieFetcher
 
   def execute
      movie_record = get_movie_record
+
+     if movie_record.blank?
+       errors << FetcherError.new(status: 404, message: "Movie not found")
+     end
+
      return if errors.present?
 
      movie = mapped_movie_keys.zip(movie_record.pop).to_h
