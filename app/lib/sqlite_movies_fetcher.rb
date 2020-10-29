@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class SqliteMoviesFetcher
   attr_reader :results, :limit, :offset, :errors, :sql_runner, :movies_db,
               :transformer

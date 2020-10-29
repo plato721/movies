@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class MoviesIndexOrchestrator
   include ActiveModel::Validations
 
@@ -8,7 +10,7 @@ class MoviesIndexOrchestrator
   validates :per_page, numericality: { only_integer: true }
 
   def initialize(page:, per_page: 50, fetcher_class: nil)
-    @page = page || "1"
+    @page = page || '1'
     @per_page = per_page
     @results = {}
     @fetcher_class = fetcher_class || SqliteMoviesFetcher
@@ -31,7 +33,7 @@ class MoviesIndexOrchestrator
     if fetcher.execute
       @results = { movies: fetcher.results }
     else
-      errors.add(:fetcher, fetcher.errors.join(", "))
+      errors.add(:fetcher, fetcher.errors.join(', '))
       false
     end
   end

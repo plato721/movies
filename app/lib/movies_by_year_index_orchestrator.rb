@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class MoviesByYearIndexOrchestrator
   include ActiveModel::Validations
 
@@ -9,7 +11,7 @@ class MoviesByYearIndexOrchestrator
   validates :year, numericality: { only_integer: true }
 
   def initialize(page:, per_page: 50, year: nil, fetcher_class: nil)
-    @page = page || "1"
+    @page = page || '1'
     @per_page = per_page
     @results = {}
     @year = year
@@ -31,8 +33,8 @@ class MoviesByYearIndexOrchestrator
     fetcher = fetcher_class.new(limit: limit, offset: offset, year: year.to_i)
     movies = fetcher.execute
     if !movies
-      errors.add(:fetcher, fetcher.errors.join(", "))
-      return false
+      errors.add(:fetcher, fetcher.errors.join(', '))
+      false
     else
       @results = { movies: movies }
     end

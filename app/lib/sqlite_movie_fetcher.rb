@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class SqliteMovieFetcher
   attr_reader :movies_db, :ratings_db, :id, :result, :sql_runner
   attr_accessor :errors
@@ -43,7 +45,7 @@ class SqliteMovieFetcher
   end
 
   def mapped_movie_keys
-    %i(
+    %i[
       movieId
       imdbId
       title
@@ -53,29 +55,34 @@ class SqliteMovieFetcher
       runtime
       genres
       originalLanguage
-      productionCompanies)
+      productionCompanies
+    ]
   end
 
   def execute
-     movie_record = get_movie_record
-     return if errors.present?
+    movie_record = get_movie_record
+    return if errors.present?
 
-     movie = mapped_movie_keys.zip(movie_record.pop).to_h
-     raw_rating = get_rating
-     return if errors.present?
+    movie = mapped_movie_keys.zip(movie_record.pop).to_h
+    raw_rating = get_rating
+    return if errors.present?
 
-     rating = transform_rating(raw_rating)
-     return if errors.present?
+    rating = transform_rating(raw_rating)
+    return if errors.present?
 
-     budget = transform_budget(movie[:budget])
-     @result = movie.merge(
-       { averageRating: rating,
-         budget: budget }
-      )
+    budget = transform_budget(movie[:budget])
+    @result = movie.merge(
+      { averageRating: rating,
+        budget: budget }
+    )
   end
 
   def transform_budget(cents)
-    budget = (cents / 100) rescue 0
+    budget = begin
+      (cents / 100)
+    rescue StandardError
+      0
+    end
     "$#{budget.to_s(:delimited)}"
   end
 
@@ -84,7 +91,7 @@ class SqliteMovieFetcher
   rescue StandardError => e
     backtrace = e.backtrace.join("\n")
     Rails.logger.error { "#{e.message}\n#{backtrace}" }
-    errors << "Rating missing or non-numeric."
+    errors << 'Rating missing or non-numeric.'
     false
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # sqlite> .schema movies
 # CREATE TABLE movies (
 #   movieId INTEGER PRIMARY KEY,
@@ -18,10 +20,10 @@ class SqliteMoviesConnector
   end
 
   def self.path
-    ENV.fetch("MOVIES_SQLITE_DB"){ Rails.root.join('./db/movies.db').to_s }
+    ENV.fetch('MOVIES_SQLITE_DB') { Rails.root.join('./db/movies.db').to_s }
   end
 
   def initialize
-    raise NoMethodError, "Use .get_connector for the connection"
+    raise NoMethodError, 'Use .get_connector for the connection'
   end
 end

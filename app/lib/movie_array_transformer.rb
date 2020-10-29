@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 class MovieArrayTransformer
   class << self
     def movie_keys
-      %i(imdbId title genres releaseDate budget)
+      %i[imdbId title genres releaseDate budget]
     end
 
     def execute(results)
@@ -13,7 +15,11 @@ class MovieArrayTransformer
 
     def transform(hashed_row)
       budget = hashed_row[:budget]
-      budget = budget / 100 rescue 0
+      budget = begin
+        budget / 100
+      rescue StandardError
+        0
+      end
       hashed_row[:budget] = "$#{budget.to_s(:delimited)}"
       hashed_row
     end

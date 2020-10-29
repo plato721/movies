@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class MoviesShowOrchestrator
   include ActiveModel::Validations
 
@@ -21,7 +23,7 @@ class MoviesShowOrchestrator
     if fetcher.execute
       @result = { movie: fetcher.result }
     else
-      errors.add(:fetcher, fetcher.errors.join(", "))
+      errors.add(:fetcher, fetcher.errors.join(', '))
       false
     end
   end
